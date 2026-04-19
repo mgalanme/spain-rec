@@ -1,6 +1,6 @@
 services:
 
-  # ── Zookeeper (requerido por Kafka) ─────────────────────────────────────────
+  # ── Zookeeper ────────────────────────────────────────────────────────────────
   zookeeper:
     image: confluentinc/cp-zookeeper:7.6.1
     container_name: spain-rec-zookeeper
@@ -87,12 +87,12 @@ services:
     volumes:
       - qdrant_data:/qdrant/storage
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:6333/healthz"]
+      test: ["CMD-SHELL", "timeout 1 bash -c 'cat < /dev/null > /dev/tcp/localhost/6333' && echo OK || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 5
 
-  # ── n8n ─────────────────────────────────────────────────────────────────────
+  # ── n8n ──────────────────────────────────────────────────────────────────────
   n8n:
     image: n8nio/n8n:latest
     container_name: spain-rec-n8n
@@ -116,7 +116,7 @@ services:
     volumes:
       - n8n_data:/home/node/.n8n
 
-  # ── Redis (opcional, perfil full) ────────────────────────────────────────────
+  # ── Redis ────────────────────────────────────────────────────────────────────
   redis:
     image: redis:7.2-alpine
     container_name: spain-rec-redis
