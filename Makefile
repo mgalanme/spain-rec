@@ -3,7 +3,7 @@
 # ── Variables ────────────────────────────────────────────────────────────────
 COMPOSE = docker compose -f docker/docker-compose.yml
 VENV    = .venv-langchain
-PYTHON  = $(VENV)/bin/python
+PYTHON  = $(shell [ -f $(VENV)/bin/python ] && echo $(VENV)/bin/python || echo $(VENV)/Scripts/python)
 UV      = uv
 
 help:
@@ -25,8 +25,8 @@ help:
 	@echo ""
 
 setup:
-	$(UV) venv $(VENV)
-	$(UV) pip install -e ".[dev]" --python $(VENV)/bin/python
+	$(UV) venv $(VENV) --clear
+	UV_PROJECT_ENVIRONMENT=$(VENV) $(UV) sync --extra dev
 	@if [ ! -f .env ]; then cp .env.example .env && echo ".env created from .env.example"; fi
 	@echo "Setup complete. Activate with: source $(VENV)/bin/activate"
 
