@@ -213,6 +213,15 @@ def ingest_qdrant(conn):
 
     count = client.count(collection_name=COLLECTION_NAME).count
     print(f"  Collection '{COLLECTION_NAME}' now has {count} vectors.")
+
+    # Smoke test: semantic search with new API (qdrant-client >= 1.17)
+    from sentence_transformers import SentenceTransformer as ST
+    test_model = ST(EMBEDDING_MODEL, trust_remote_code=True)
+    test_vector = test_model.encode("search_query: beach southern Spain", normalize_embeddings=True).tolist()
+    results = client.query_points(collection_name=COLLECTION_NAME, query=test_vector, limit=3).points
+    print("  Smoke test — top 3 results for 'beach southern Spain':")
+    for r in results:
+        print(f"    {r.score:.3f} — {r.payload['name']}")
     print("  Qdrant ingestion complete.")
 
 
