@@ -232,3 +232,55 @@ MIT — see [LICENSE](LICENSE)
 ---
 
 *Maintained by Martin Galan — Enterprise Architect | Data Architect | AI Architect*
+
+## Running the Pipeline
+
+### CLI mode (with interactive HITL)
+
+```bash
+source .venv-langchain/bin/activate
+
+# Random tourist
+PYTHONPATH=. python3 src/agents/run.py
+
+# Specific tourist
+PYTHONPATH=. python3 src/agents/run.py <tourist_id>
+```
+
+### API mode (auto-approve, no HITL prompt)
+
+```bash
+# Start the API server
+PYTHONPATH=. uvicorn src.api.main:app --host 0.0.0.0 --port 8000 --reload
+
+# In a second terminal:
+
+# Trigger a recommendation
+curl -s -X POST http://localhost:8000/recommend \
+  -H "Content-Type: application/json" \
+  -d '{}'
+
+# Poll status
+curl -s http://localhost:8000/recommend/status/<run_id>
+
+# List tourists
+curl -s "http://localhost:8000/tourists?limit=5"
+
+# List destinations
+curl -s http://localhost:8000/destinations
+```
+
+Interactive API docs available at: http://localhost:8000/docs
+
+### Data pipeline
+
+```bash
+# Generate synthetic data (seeds PostgreSQL + publishes to Kafka)
+PYTHONPATH=. python3 data/generator/generate.py
+
+# Ingest into Neo4j and Qdrant
+PYTHONPATH=. python3 src/pipeline/ingest.py
+
+# Verify all connections
+python3 scripts/verify_connections.py
+```
